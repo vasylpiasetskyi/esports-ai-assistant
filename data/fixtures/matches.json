@@ -1,0 +1,20 @@
+[
+  {
+    "match_id": "navi-vs-vitality-2026-08-01",
+    "game": "cs2",
+    "teams": ["NAVI", "Vitality"],
+    "score": "1-2",
+    "status": "finished",
+    "date": "2026-08-01",
+    "tournament": "IEM Cologne 2026"
+  },
+  {
+    "match_id": "t1-vs-geng-2026-07-15",
+    "game": "lol",
+    "teams": ["T1", "Gen.G"],
+    "score": "3-1",
+    "status": "finished",
+    "date": "2026-07-15",
+    "tournament": "LCK Summer 2026"
+  }
+]
