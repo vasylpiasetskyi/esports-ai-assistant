@@ -427,3 +427,60 @@ def test_assistant_folds_game_into_input_text(monkeypatch):
         if isinstance(message, HumanMessage)
     ]
     assert any("cs2" in message.content for message in human_messages)
+
+
+def test_investigate_returns_report_and_findings(monkeypatch):
+    monkeypatch.setenv("OPENAI_API_KEY", "test-key")
+    qdrant_client = QdrantClient(":memory:")
+    _seed_client(qdrant_client)
+
+    # 4 responses, in order: analyze_question (structured), the RAG chain
+    # inside retrieve_knowledge (real RAGService shares this same llm — see
+    # the Milestone 5 gotcha), analyze_evidence (structured, sufficient=True
+    # — the no-retry happy path keeps this sequence short and unambiguous),
+    # generate_report.
+    llm = FakeToolCallingChatModel(
+        responses=[
+            AIMessage(
+                content="",
+                tool_calls=[
+                    {
+                        "name": "QuestionAnalysis",
+                        "args": {"game": "cs2", "team_name": "NAVI"},
+                        "id": "call_1",
+                    }
+                ],
+            ),
+            AIMessage(content="Inferno is a CS2 map favored by Vitality."),
+            AIMessage(
+                content="",
+                tool_calls=[
+                    {
+                        "name": "EvidenceAnalysis",
+                        "args": {
+                            "sufficient": True,
+                            "findings": ["NAVI lost 1-2 to Vitality on Inferno."],
+                        },
+                        "id": "call_2",
+                    }
+                ],
+            ),
+            AIMessage(content="NAVI lost their latest match 1-2 to Vitality."),
+        ]
+    )
+    app.dependency_overrides[get_qdrant_client] = lambda: qdrant_client
+    app.dependency_overrides[get_embeddings] = lambda: ConstantFakeEmbeddings()
+    app.dependency_overrides[get_llm] = lambda: llm
+
+    try:
+        with TestClient(app) as client:
+            response = client.post(
+                "/investigate", json={"question": "Why did NAVI lose their latest match?"}
+            )
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["report"] == "NAVI lost their latest match 1-2 to Vitality."
+    assert body["findings"] == ["NAVI lost 1-2 to Vitality on Inferno."]

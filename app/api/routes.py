@@ -12,6 +12,8 @@ from app.api.schemas import (
     AssistantRequest,
     AssistantResponse,
     HealthResponse,
+    InvestigateRequest,
+    InvestigateResponse,
     TaskStartedResponse,
 )
 from app.rag.service import RAGService
@@ -23,6 +25,7 @@ from app.tools.knowledge import make_search_knowledge_base_tool
 from app.tools.match import make_get_match_tool
 from app.tools.player import make_get_player_tool
 from app.tools.team import make_get_team_tool
+from app.workflows.graph import build_investigation_graph
 from crawler.service import run_crawl
 from ingestion.service import run_reindex
 
@@ -102,6 +105,37 @@ def assistant(
                     sources.append(url)
 
     return AssistantResponse(answer=result["output"], sources=sources)
+
+
+def get_investigation_graph(
+    qdrant_client: QdrantClient = Depends(get_qdrant_client),
+    embeddings: Embeddings = Depends(get_embeddings),
+    llm: BaseChatModel = Depends(get_llm),
+):
+    data_source = MockEsportsDataSource()
+    match_service = MatchService(data_source)
+    rag_service = RAGService(qdrant_client, embeddings, llm)
+    return build_investigation_graph(llm, match_service, rag_service)
+
+
+@router.post("/investigate", response_model=InvestigateResponse)
+def investigate(
+    payload: InvestigateRequest,
+    graph=Depends(get_investigation_graph),
+) -> InvestigateResponse:
+    initial_state = {
+        "question": payload.question,
+        "game": payload.game or "",
+        "team_name": None,
+        "match_id": None,
+        "evidence": [],
+        "findings": [],
+        "needs_more_data": False,
+        "retry_count": 0,
+        "final_answer": None,
+    }
+    result = graph.invoke(initial_state)
+    return InvestigateResponse(report=result["final_answer"] or "", findings=result["findings"])
 
 
 @router.post("/crawl", status_code=202, response_model=TaskStartedResponse)

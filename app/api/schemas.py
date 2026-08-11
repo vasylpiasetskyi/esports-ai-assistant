@@ -24,6 +24,16 @@ class AssistantResponse(BaseModel):
     sources: list[str]
 
 
+class InvestigateRequest(BaseModel):
+    question: str
+    game: str | None = None
+
+
+class InvestigateResponse(BaseModel):
+    report: str
+    findings: list[str]
+
+
 class HealthResponse(BaseModel):
     status: str
 
