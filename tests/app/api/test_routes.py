@@ -4,7 +4,12 @@ import httpx
 from fastapi.testclient import TestClient
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
-from langchain_core.language_models.fake_chat_models import FakeListChatModel
+from langchain_core.language_models.fake_chat_models import (
+    FakeListChatModel,
+    FakeMessagesListChatModel,
+)
+from langchain_core.messages import AIMessage, HumanMessage
+from pydantic import Field
 from qdrant_client import QdrantClient
 
 import crawler.service
@@ -337,3 +342,88 @@ def test_ask_passes_use_compression_and_llm_to_build_retriever(monkeypatch):
     assert response.status_code == 200
     assert captured_kwargs.get("use_compression") is True
     assert captured_kwargs.get("llm") is fake_llm
+
+
+class FakeToolCallingChatModel(FakeMessagesListChatModel):
+    """See `tests/app/agents/test_esports_agent.py` (Milestone 5) and
+    `tests/scripts/test_run_tool_loop.py` (Milestone 4) for the same
+    pattern."""
+
+    def bind_tools(self, tools, **kwargs):
+        return self.bind(tools=tools, **kwargs)
+
+
+class RecordingFakeChatModel(FakeToolCallingChatModel):
+    received: list = Field(default_factory=list)
+
+    def _generate(self, messages, stop=None, run_manager=None, **kwargs):
+        self.received.append(messages)
+        return super()._generate(messages, stop=stop, run_manager=run_manager, **kwargs)
+
+
+def test_assistant_returns_answer_and_sources_from_knowledge_base(monkeypatch):
+    monkeypatch.setenv("OPENAI_API_KEY", "test-key")
+    qdrant_client = QdrantClient(":memory:")
+    _seed_client(qdrant_client)
+
+    # 3 responses, not 2: search_knowledge_base's RAGService.answer() calls
+    # this same shared `llm` internally (via the RAG chain) to generate the
+    # RAG answer text, in between the agent's own two reasoning calls — the
+    # fake model cycles through `responses` for every invocation, agent and
+    # RAG chain alike.
+    llm = FakeToolCallingChatModel(
+        responses=[
+            AIMessage(
+                content="",
+                tool_calls=[
+                    {
+                        "name": "search_knowledge_base",
+                        "args": {"question": "What is Inferno?"},
+                        "id": "call_1",
+                    }
+                ],
+            ),
+            AIMessage(content="Inferno is a CS2 map."),
+            AIMessage(content="Inferno is a CS2 map."),
+        ]
+    )
+    app.dependency_overrides[get_qdrant_client] = lambda: qdrant_client
+    app.dependency_overrides[get_embeddings] = lambda: ConstantFakeEmbeddings()
+    app.dependency_overrides[get_llm] = lambda: llm
+
+    try:
+        with TestClient(app) as client:
+            response = client.post("/assistant", json={"question": "What is Inferno?"})
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["answer"] == "Inferno is a CS2 map."
+    assert "https://liquipedia.net/counterstrike/Inferno" in body["sources"]
+
+
+def test_assistant_folds_game_into_input_text(monkeypatch):
+    monkeypatch.setenv("OPENAI_API_KEY", "test-key")
+    qdrant_client = QdrantClient(":memory:")
+    _seed_client(qdrant_client)
+
+    llm = RecordingFakeChatModel(responses=[AIMessage(content="Some answer.")])
+    app.dependency_overrides[get_qdrant_client] = lambda: qdrant_client
+    app.dependency_overrides[get_embeddings] = lambda: ConstantFakeEmbeddings()
+    app.dependency_overrides[get_llm] = lambda: llm
+
+    try:
+        with TestClient(app) as client:
+            response = client.post("/assistant", json={"question": "Who is s1mple?", "game": "cs2"})
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 200
+    human_messages = [
+        message
+        for messages in llm.received
+        for message in messages
+        if isinstance(message, HumanMessage)
+    ]
+    assert any("cs2" in message.content for message in human_messages)

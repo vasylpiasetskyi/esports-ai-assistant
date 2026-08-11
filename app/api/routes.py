@@ -1,11 +1,28 @@
 import httpx
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
+from langchain_classic.agents import AgentExecutor
 from langchain_core.embeddings import Embeddings
 from langchain_core.language_models import BaseChatModel
 from qdrant_client import QdrantClient
 
-from app.api.schemas import AskRequest, AskResponse, HealthResponse, TaskStartedResponse
+from app.agents.esports_agent import make_esports_agent
+from app.api.schemas import (
+    AskRequest,
+    AskResponse,
+    AssistantRequest,
+    AssistantResponse,
+    HealthResponse,
+    TaskStartedResponse,
+)
 from app.rag.service import RAGService
+from app.services.data_source import MockEsportsDataSource
+from app.services.match_service import MatchService
+from app.services.player_service import PlayerService
+from app.services.team_service import TeamService
+from app.tools.knowledge import make_search_knowledge_base_tool
+from app.tools.match import make_get_match_tool
+from app.tools.player import make_get_player_tool
+from app.tools.team import make_get_team_tool
 from crawler.service import run_crawl
 from ingestion.service import run_reindex
 
@@ -49,6 +66,42 @@ def ask(
         use_compression=payload.use_compression,
     )
     return AskResponse(answer=result.answer, sources=result.sources)
+
+
+def get_agent(
+    qdrant_client: QdrantClient = Depends(get_qdrant_client),
+    embeddings: Embeddings = Depends(get_embeddings),
+    llm: BaseChatModel = Depends(get_llm),
+) -> AgentExecutor:
+    data_source = MockEsportsDataSource()
+    rag_service = RAGService(qdrant_client, embeddings, llm)
+    tools = [
+        make_get_player_tool(PlayerService(data_source)),
+        make_get_team_tool(TeamService(data_source)),
+        make_get_match_tool(MatchService(data_source)),
+        make_search_knowledge_base_tool(rag_service),
+    ]
+    return make_esports_agent(llm, tools)
+
+
+@router.post("/assistant", response_model=AssistantResponse)
+def assistant(
+    payload: AssistantRequest,
+    agent: AgentExecutor = Depends(get_agent),
+) -> AssistantResponse:
+    input_text = (
+        payload.question if payload.game is None else f"{payload.question} (Game: {payload.game})"
+    )
+    result = agent.invoke({"input": input_text})
+
+    sources: list[str] = []
+    for action, observation in result["intermediate_steps"]:
+        if action.tool == "search_knowledge_base" and isinstance(observation, dict):
+            for url in observation.get("sources", []):
+                if url not in sources:
+                    sources.append(url)
+
+    return AssistantResponse(answer=result["output"], sources=sources)
 
 
 @router.post("/crawl", status_code=202, response_model=TaskStartedResponse)

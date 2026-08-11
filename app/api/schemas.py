@@ -14,6 +14,16 @@ class AskResponse(BaseModel):
     sources: list[str]
 
 
+class AssistantRequest(BaseModel):
+    question: str
+    game: str | None = None
+
+
+class AssistantResponse(BaseModel):
+    answer: str
+    sources: list[str]
+
+
 class HealthResponse(BaseModel):
     status: str
 
