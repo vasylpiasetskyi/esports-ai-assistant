@@ -49,3 +49,14 @@ class MockEsportsDataSource:
             ),
             None,
         )
+
+    def find_latest_match_for_team(self, game: str, team_name: str) -> dict | None:
+        matches = [
+            match
+            for match in self._matches
+            if match["game"] == game
+            and team_name.lower() in [team.lower() for team in match["teams"]]
+        ]
+        if not matches:
+            return None
+        return max(matches, key=lambda match: match["date"])

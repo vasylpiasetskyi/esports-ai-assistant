@@ -12,3 +12,9 @@ class MatchService:
         if record is None:
             raise MatchNotFoundError(f"No match '{match_id}' found for game '{game}'")
         return Match(**record)
+
+    def get_latest_match_for_team(self, game: str, team_name: str) -> Match:
+        record = self._data_source.find_latest_match_for_team(game, team_name)
+        if record is None:
+            raise MatchNotFoundError(f"No matches found for team '{team_name}' in game '{game}'")
+        return Match(**record)
