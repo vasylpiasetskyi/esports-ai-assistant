@@ -1,0 +1,5 @@
+[
+  {"name": "NAVI", "game": "cs2", "players": ["s1mple", "b1t"]},
+  {"name": "T1", "game": "lol", "players": ["Faker"]},
+  {"name": "Sentinels", "game": "valorant", "players": ["TenZ"]}
+]

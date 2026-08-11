@@ -4,10 +4,10 @@ from langchain_core.embeddings import Embeddings
 from langchain_core.language_models import BaseChatModel
 from qdrant_client import QdrantClient
 
-from api.schemas import AskRequest, AskResponse, HealthResponse, TaskStartedResponse
+from app.api.schemas import AskRequest, AskResponse, HealthResponse, TaskStartedResponse
+from app.rag.service import RAGService
 from crawler.service import run_crawl
 from ingestion.service import run_reindex
-from rag.service import RAGService
 
 router = APIRouter()
 

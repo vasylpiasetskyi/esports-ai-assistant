@@ -3,7 +3,7 @@ from langchain_core.documents import Document
 from langchain_core.language_models.fake_chat_models import FakeListChatModel
 from langchain_core.retrievers import BaseRetriever
 
-from rag.chains import NO_CONTEXT_ANSWER, answer_question
+from app.rag.chains import NO_CONTEXT_ANSWER, answer_question
 
 
 class FakeRetriever(BaseRetriever):

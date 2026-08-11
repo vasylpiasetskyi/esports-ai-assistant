@@ -942,6 +942,34 @@ Acceptance criteria:
 
 ---
 
+## Milestone 2.5
+
+Restructure the existing flat top-level packages into the `app/` layout from
+§23:
+
+```text
+api/       → app/api/
+rag/       → app/rag/
+tools/     → app/tools/
+services/  → app/services/
+```
+
+`crawler/`, `ingestion/`, `scripts/`, `config/`, `data/` stay at the
+repository root, matching §23. `app/agents/` and `app/workflows/` are not
+created yet — they arrive with real content in Milestones 5 and 6, not as
+empty stubs. `mcp/` is still Milestone 7.
+
+No behavior changes: purely a physical move plus import-path updates.
+
+Acceptance criteria:
+
+* `/ask`, `/crawl`, `/reindex`, `/health` all still work
+* all existing tests pass, moved to `tests/app/{api,rag,tools,services}/`
+* no code outside `app/` imports from the old `api.`/`rag.`/`tools.`/`services.` paths
+* ADR recorded (`docs/decisions.md`)
+
+---
+
 ## Milestone 3
 
 Expose:

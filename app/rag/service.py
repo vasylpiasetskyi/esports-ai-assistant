@@ -2,9 +2,9 @@ from langchain_core.embeddings import Embeddings
 from langchain_core.language_models import BaseChatModel
 from qdrant_client import QdrantClient
 
+from app.rag.chains import RagAnswer, answer_question
+from app.rag.retriever import build_retriever
 from ingestion.indexer import COLLECTION_NAME
-from rag.chains import RagAnswer, answer_question
-from rag.retriever import build_retriever
 
 
 class RAGService:
@@ -12,7 +12,7 @@ class RAGService:
     configuration and LLM invocation behind a single `answer()` call.
 
     Callers (API routes, LangChain tools, the Agent) depend only on this
-    class, never on `rag.retriever` or `rag.chains` directly.
+    class, never on `app.rag.retriever` or `app.rag.chains` directly.
     """
 
     def __init__(

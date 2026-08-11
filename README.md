@@ -49,7 +49,7 @@ uv run --env-file .env python -m scripts.run_retriever  # interactive retrieval,
 ## Running the API
 
 ```bash
-uv run --env-file .env uvicorn api.main:app --reload
+uv run --env-file .env uvicorn app.api.main:app --reload
 ```
 
 ```bash

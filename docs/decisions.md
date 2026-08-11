@@ -323,6 +323,73 @@ over-engineer this boundary.
 
 ---
 
+# ADR-011 — Restructure into an `app/` Package Layout
+
+## Status
+
+Accepted
+
+## Decision
+
+Move `api/`, `rag/`, `tools/`, `services/` under a new top-level `app/`
+package (`app/api/`, `app/rag/`, `app/tools/`, `app/services/`), matching the
+target layout in `docs/roadmap-ai-assistant.md` §23. `crawler/`, `ingestion/`,
+`scripts/`, `config/`, `data/`, and `tests/` (aside from the subfolders that
+mirror the moved packages) stay at the repository root. `app/agents/` and
+`app/workflows/` are added only when Milestones 5/6 actually introduce real
+code there — not as empty stubs now. `mcp/` is not created yet (Milestone 7).
+Tracked as Milestone 2.5, inserted between Milestone 2 and Milestone 3.
+
+## Rationale
+
+Milestone 1 deliberately deferred this restructuring rather than doing it
+opportunistically during a docs-sync pass (see `docs/PROJECT_STATUS.md`'s
+Milestone 1 note). Two milestones of AI-assistant code now exist at the repo
+root (`RAGService`, then the player/team/match tools+services), so the
+divergence from §23's target tree is starting to compound. This is the
+natural point to close the gap, before Milestone 3 adds a third tool
+(`search_knowledge_base`) at the wrong location too.
+
+## Alternatives Considered
+
+### Wait until all milestones are done, restructure once at the end
+
+Rejected — every milestone after this one would keep adding files to the
+wrong (flat) location, making the eventual move larger and riskier, and every
+new file would need to be reviewed against two different layouts in the
+meantime.
+
+### Create empty `app/agents/` and `app/workflows/` packages now, matching §23 exactly
+
+Rejected — `.claude/rules/project-rules.md`'s "Quality" rule forbids
+placeholder implementations, and an empty package with no code is exactly
+that. They'll be created naturally in Milestones 5 and 6 when there's real
+content for them.
+
+### Split `app/api/routes.py` into `app/api/routes/{ask,assistant,investigate,health}.py` now, matching §23 exactly
+
+Rejected — `assistant.py` and `investigate.py` have no content until
+Milestones 5/6 exist. §23's fully-split routes tree is the end state the
+roadmap evolves toward, not a requirement of this milestone. `app/api/routes.py`
+stays one file and gets split incrementally as each new endpoint is actually
+added.
+
+## Consequences
+
+* All intra-project imports referencing `api.*`, `rag.*`, `tools.*`,
+  `services.*` become `app.api.*`, `app.rag.*`, `app.tools.*`,
+  `app.services.*`.
+* Tests mirroring those packages move from `tests/{api,rag,tools,services}/`
+  to `tests/app/{api,rag,tools,services}/`; `tests/crawler/` and
+  `tests/ingestion/` are unaffected.
+* `uvicorn api.main:app` becomes `uvicorn app.api.main:app` (README,
+  `docs/PROJECT_STATUS.md`'s "How to resume" commands).
+* §23's `tests/unit/`, `tests/integration/`, `tests/evals/` reorganization is
+  a separate, larger concern (`evals/` is literally Milestone 8 scope) and is
+  explicitly out of scope for this milestone.
+
+---
+
 # Future ADRs
 
 New architectural decisions should be added using the same structure:

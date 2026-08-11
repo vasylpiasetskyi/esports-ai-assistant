@@ -130,6 +130,13 @@ esports-wiki-ai/
 
     README.md
 
+**Note (2026-08-11):** this structure describes the frozen RAG-only v1
+baseline. As of Milestone 2.5 in `docs/roadmap-ai-assistant.md`, `rag/` and
+`api/` (along with `tools/` and `services/`, added in Milestone 2) live under
+a new top-level `app/` package — see `docs/architecture.md` and
+`docs/roadmap-ai-assistant.md` §23 for the current layout. `crawler/`,
+`ingestion/`, `scripts/`, `config/`, `data/` are unaffected.
+
 ---
 
 # Technologies
