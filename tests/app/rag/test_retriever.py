@@ -5,9 +5,9 @@ from langchain_core.language_models.fake_chat_models import FakeListChatModel
 from qdrant_client import QdrantClient
 from qdrant_client.models import FieldCondition, Filter, MatchValue
 
+from app.rag.retriever import build_metadata_filter, build_retriever
 from ingestion.embeddings import EmbeddedChunk
 from ingestion.indexer import index_embedded_chunks
-from rag.retriever import build_metadata_filter, build_retriever
 
 
 def test_build_metadata_filter_builds_field_conditions_from_dict():

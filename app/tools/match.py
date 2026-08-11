@@ -1,7 +1,7 @@
 from langchain_core.tools import tool
 from pydantic import BaseModel, Field
 
-from services.match_service import MatchService
+from app.services.match_service import MatchService
 
 
 class GetMatchInput(BaseModel):

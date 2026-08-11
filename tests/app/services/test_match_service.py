@@ -1,8 +1,8 @@
 import pytest
 
-from services.data_source import MockEsportsDataSource
-from services.exceptions import MatchNotFoundError
-from services.match_service import MatchService
+from app.services.data_source import MockEsportsDataSource
+from app.services.exceptions import MatchNotFoundError
+from app.services.match_service import MatchService
 
 
 def test_get_match_returns_matching_match():

@@ -1,8 +1,8 @@
 import pytest
 
-from services.data_source import MockEsportsDataSource
-from services.exceptions import TeamNotFoundError
-from services.team_service import TeamService
+from app.services.data_source import MockEsportsDataSource
+from app.services.exceptions import TeamNotFoundError
+from app.services.team_service import TeamService
 
 
 def test_get_team_returns_matching_team():

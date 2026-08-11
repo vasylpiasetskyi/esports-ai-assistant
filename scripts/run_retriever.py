@@ -4,8 +4,8 @@ import os
 from langchain_openai import OpenAIEmbeddings
 from qdrant_client import QdrantClient
 
+from app.rag.retriever import build_retriever
 from ingestion.indexer import COLLECTION_NAME
-from rag.retriever import build_retriever
 
 EMBEDDING_MODEL = "text-embedding-3-small"
 DEFAULT_QDRANT_URL = "http://localhost:6333"

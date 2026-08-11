@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-DEFAULT_FIXTURES_DIR = Path(__file__).resolve().parent.parent / "data" / "fixtures"
+DEFAULT_FIXTURES_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "fixtures"
 
 
 class MockEsportsDataSource:

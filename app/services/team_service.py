@@ -1,6 +1,6 @@
-from services.data_source import MockEsportsDataSource
-from services.exceptions import TeamNotFoundError
-from services.models import Team
+from app.services.data_source import MockEsportsDataSource
+from app.services.exceptions import TeamNotFoundError
+from app.services.models import Team
 
 
 class TeamService:

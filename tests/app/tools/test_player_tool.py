@@ -1,7 +1,7 @@
 import pytest
 
-from services.exceptions import PlayerNotFoundError
-from tools.player import make_get_player_tool
+from app.services.exceptions import PlayerNotFoundError
+from app.tools.player import make_get_player_tool
 
 
 class FakePlayerService:

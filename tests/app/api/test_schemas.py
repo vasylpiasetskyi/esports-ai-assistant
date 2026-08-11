@@ -1,4 +1,4 @@
-from api.schemas import AskRequest, AskResponse, HealthResponse, TaskStartedResponse
+from app.api.schemas import AskRequest, AskResponse, HealthResponse, TaskStartedResponse
 
 
 def test_ask_request_game_defaults_to_none():

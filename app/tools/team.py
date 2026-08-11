@@ -1,7 +1,7 @@
 from langchain_core.tools import tool
 from pydantic import BaseModel, Field
 
-from services.team_service import TeamService
+from app.services.team_service import TeamService
 
 
 class GetTeamInput(BaseModel):

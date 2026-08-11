@@ -1,7 +1,7 @@
 import pytest
 
-from services.exceptions import MatchNotFoundError
-from tools.match import make_get_match_tool
+from app.services.exceptions import MatchNotFoundError
+from app.tools.match import make_get_match_tool
 
 
 class FakeMatchService:

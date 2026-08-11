@@ -1,6 +1,6 @@
-from services.data_source import MockEsportsDataSource
-from services.exceptions import PlayerNotFoundError
-from services.models import Player
+from app.services.data_source import MockEsportsDataSource
+from app.services.exceptions import PlayerNotFoundError
+from app.services.models import Player
 
 
 class PlayerService:

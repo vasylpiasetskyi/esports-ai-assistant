@@ -1,6 +1,6 @@
-from services.data_source import MockEsportsDataSource
-from services.exceptions import MatchNotFoundError
-from services.models import Match
+from app.services.data_source import MockEsportsDataSource
+from app.services.exceptions import MatchNotFoundError
+from app.services.models import Match
 
 
 class MatchService:

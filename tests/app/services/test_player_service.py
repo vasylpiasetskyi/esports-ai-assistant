@@ -1,8 +1,8 @@
 import pytest
 
-from services.data_source import MockEsportsDataSource
-from services.exceptions import PlayerNotFoundError
-from services.player_service import PlayerService
+from app.services.data_source import MockEsportsDataSource
+from app.services.exceptions import PlayerNotFoundError
+from app.services.player_service import PlayerService
 
 
 def test_get_player_returns_matching_player():

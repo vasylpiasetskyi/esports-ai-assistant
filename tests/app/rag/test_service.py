@@ -3,10 +3,10 @@ from langchain_core.embeddings import Embeddings
 from langchain_core.language_models.fake_chat_models import FakeListChatModel
 from qdrant_client import QdrantClient
 
+from app.rag.chains import NO_CONTEXT_ANSWER
+from app.rag.service import RAGService
 from ingestion.embeddings import EmbeddedChunk
 from ingestion.indexer import index_embedded_chunks
-from rag.chains import NO_CONTEXT_ANSWER
-from rag.service import RAGService
 
 _VECTORS = {
     "Inferno content": [1.0, 0.0, 0.0],

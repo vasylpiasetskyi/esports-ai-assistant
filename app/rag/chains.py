@@ -5,7 +5,7 @@ from langchain_core.language_models import BaseChatModel
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.retrievers import BaseRetriever
 
-from rag.prompts import RAG_PROMPT
+from app.rag.prompts import RAG_PROMPT
 
 NO_CONTEXT_ANSWER = "I don't have enough information to answer that question."
 

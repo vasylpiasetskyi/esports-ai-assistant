@@ -1,7 +1,7 @@
 from langchain_core.tools import tool
 from pydantic import BaseModel, Field
 
-from services.player_service import PlayerService
+from app.services.player_service import PlayerService
 
 
 class GetPlayerInput(BaseModel):

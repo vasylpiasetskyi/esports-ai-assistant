@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from qdrant_client import QdrantClient
 
-from api.routes import router
+from app.api.routes import router
 
 EMBEDDING_MODEL = "text-embedding-3-small"
 CHAT_MODEL = "gpt-4o-mini"

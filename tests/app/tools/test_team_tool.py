@@ -1,7 +1,7 @@
 import pytest
 
-from services.exceptions import TeamNotFoundError
-from tools.team import make_get_team_tool
+from app.services.exceptions import TeamNotFoundError
+from app.tools.team import make_get_team_tool
 
 
 class FakeTeamService:
