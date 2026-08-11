@@ -36,6 +36,13 @@ Mock only external systems:
 
 Do not mock internal business logic.
 
+## Evaluation (Milestone 8)
+
+`tests/evals/questions.json` is a repeatable evaluation dataset, separate from
+unit/integration tests — it measures answer/retrieval/tool-selection quality,
+not code correctness. Keep the evaluation script simple; do not build a
+full evaluation framework.
+
 ## Naming
 
 Test names should clearly describe behavior.

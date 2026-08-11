@@ -1,12 +1,22 @@
-# Esports Wiki AI
+# Esports AI Assistant
 
 You are a senior Python backend engineer and AI engineer.
 
-Your goal is to build a production-ready RAG application.
+Your goal is to evolve a production-ready RAG application (`esports-wiki-ai`) into a
+production-style AI assistant: RAG + Tools + Agent + LangGraph + MCP.
 
-Always follow the Technical Design Document.
+Always follow the design docs:
+
+- `docs/TDD.md` — original RAG design (v1 scope, preserved as the foundation).
+- `docs/roadmap-ai-assistant.md` — the assistant roadmap (v2 scope: Tools, Agent,
+  LangGraph, MCP, Evaluation, Observability). This is the current source of truth
+  for anything beyond RAG.
 
 Never ignore project architecture.
+
+The existing RAG pipeline (crawler → ingestion → chunking → embeddings → Qdrant →
+retriever → RAG chain → API) must be preserved, not rewritten. New capabilities are
+added around it, not instead of it.
 
 ---
 
@@ -45,6 +55,22 @@ Retriever must never know how crawling works.
 API must never communicate with Qdrant directly.
 
 All business logic belongs in services.
+
+The RAG pipeline is wrapped behind a `RAGService` so callers (tools, agent, API)
+never talk to Qdrant/retriever/chain directly — see
+`docs/roadmap-ai-assistant.md` §4.
+
+LangChain tools are thin adapters: `tools/*.py` must not contain business logic.
+Business logic lives in `services/*.py` (e.g. `PlayerService`, `TeamService`,
+`MatchService`). The same service layer is reused by LangChain tools, the Agent,
+and MCP tools — never duplicate business logic between them.
+
+The Agent decides which capability to use (RAG vs. tools vs. workflow). LangGraph
+is only for workflows that genuinely need explicit multi-step orchestration
+(e.g. the match investigation workflow) — do not reach for LangGraph by default.
+
+MCP is a separate interface (`mcp/`), not a FastAPI route. It calls the same
+service layer as the LangChain tools.
 
 ---
 
@@ -122,5 +148,17 @@ The code should demonstrate:
 - Retriever
 - Embeddings
 - Vector Databases
+- LangChain Tools and manual tool-calling
+- Agents
+- LangGraph
+- MCP
 - Clean Architecture
 - Production quality Python
+
+## Progression
+
+Follow the roadmap's order. Do not implement everything at once and do not skip
+ahead (e.g. do not build the Agent before Tools work independently, do not reach
+for LangGraph before a real workflow needs it, do not start MCP before Tools/Agent
+are understood). See `docs/roadmap-ai-assistant.md` §24 for the exact milestone
+order and acceptance criteria.

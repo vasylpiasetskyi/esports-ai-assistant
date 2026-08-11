@@ -36,8 +36,17 @@ Preferred order:
 8. Prompt Templates
 9. Retrieval Chains
 10. FastAPI Integration
+11. Service boundaries (RAGService)
+12. LangChain Tools
+13. Manual tool-calling loop
+14. Agents
+15. LangGraph
+16. MCP
+17. Evaluation
+18. Observability
 
-Do not skip intermediate concepts.
+Do not skip intermediate concepts. See `docs/roadmap-ai-assistant.md` for the
+detailed milestone order behind steps 11-18.
 
 ## Code
 

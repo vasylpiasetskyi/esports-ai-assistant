@@ -27,6 +27,13 @@ Before adding a package, consider whether the standard library is sufficient.
 - BeautifulSoup
 - Trafilatura
 
+Planned for the AI assistant roadmap (`docs/roadmap-ai-assistant.md`) — add only
+when the corresponding milestone is actually reached, not upfront:
+
+- LangGraph — Milestone 6 (investigation workflow), only once a real workflow
+  needs explicit multi-step orchestration.
+- An MCP SDK (e.g. the official `mcp` Python package) — Milestone 7.
+
 ## Avoid
 
 Avoid dependencies that:

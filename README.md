@@ -1,12 +1,12 @@
-# Esports Wiki AI
+# Esports AI Assistant
 
-A Retrieval-Augmented Generation (RAG) application that answers questions about esports (CS2, Dota 2, League of Legends, Valorant) from a private knowledge base crawled from Liquipedia, instead of relying solely on an LLM's own knowledge.
+A Retrieval-Augmented Generation (RAG) application that answers questions about esports (CS2, Dota 2, League of Legends, Valorant) from a private knowledge base crawled from Liquipedia, instead of relying solely on an LLM's own knowledge — now being extended into a full AI assistant (RAG + Tools + Agent + LangGraph + MCP).
 
-See `docs/TDD.md` for the full technical design and `docs/architecture.md` / `docs/decisions.md` for architecture decisions.
+See `docs/TDD.md` for the original RAG technical design, `docs/roadmap-ai-assistant.md` for the assistant roadmap that builds on top of it, and `docs/architecture.md` / `docs/decisions.md` for architecture decisions.
 
 ## Status
 
-The full pipeline is implemented end to end: crawl → ingest → chunk → embed → index → retrieve → answer, plus a FastAPI service in front of it.
+The RAG foundation is implemented end to end: crawl → ingest → chunk → embed → index → retrieve → answer, plus a FastAPI service in front of it. See `docs/PROJECT_STATUS.md` for exactly what's done and what's next (currently: Milestone 1 of `docs/roadmap-ai-assistant.md` — refactoring RAG into a reusable `RAGService`).
 
 - **Crawler** — fetches a fixed set of Liquipedia articles per game via the MediaWiki API, cleans the HTML into article text, and writes normalized JSON to `data/raw/<game>/<category>/<slug>.json`.
 - **Ingestion / Chunking / Embeddings / Indexer** — loads the crawled JSON, splits it into chunks, embeds them (`text-embedding-3-small`), and indexes them into Qdrant.
@@ -14,7 +14,7 @@ The full pipeline is implemented end to end: crawl → ingest → chunk → embe
 - **RAG Chain** — builds an answer from retrieved context using an OpenAI chat model, with source URLs attached.
 - **API** — `POST /ask`, `GET /health`, `POST /crawl`, `POST /reindex` (see below).
 
-See `docs/roadmap.md` for what's planned next.
+See `docs/roadmap-esports-wiki-ai.md` for the RAG-only improvements that were considered and `docs/roadmap-ai-assistant.md` for what's actually planned next (Tools, Agent, LangGraph, MCP).
 
 ## Setup
 
@@ -80,4 +80,4 @@ uv run black --check .
 
 ## About
 
-This started as a personal project for practicing LangChain, RAG, and production-style Python architecture.
+This started as a personal project for practicing LangChain, RAG, and production-style Python architecture. It's now being extended into a broader AI assistant to also practice LangChain tools, agents, LangGraph workflows, and MCP — see `docs/roadmap-ai-assistant.md`.

@@ -7,9 +7,9 @@ from langchain_core.embeddings import Embeddings
 from langchain_core.language_models.fake_chat_models import FakeListChatModel
 from qdrant_client import QdrantClient
 
-import api.routes
 import crawler.service
 import ingestion.service
+import rag.service
 from api.main import app
 from api.routes import get_embeddings, get_http_client, get_llm, get_qdrant_client
 from ingestion.embeddings import EmbeddedChunk
@@ -256,7 +256,7 @@ def test_ask_passes_use_hybrid_flag_to_build_retriever(monkeypatch):
         captured_kwargs.update(kwargs)
         return build_retriever(*args, **kwargs)
 
-    monkeypatch.setattr(api.routes, "build_retriever", _spy_build_retriever)
+    monkeypatch.setattr(rag.service, "build_retriever", _spy_build_retriever)
     app.dependency_overrides[get_qdrant_client] = lambda: qdrant_client
     app.dependency_overrides[get_embeddings] = lambda: ConstantFakeEmbeddings()
     app.dependency_overrides[get_llm] = lambda: FakeListChatModel(
@@ -286,7 +286,7 @@ def test_ask_passes_use_multi_query_and_llm_to_build_retriever(monkeypatch):
         captured_kwargs.update(kwargs)
         return build_retriever(*args, **kwargs)
 
-    monkeypatch.setattr(api.routes, "build_retriever", _spy_build_retriever)
+    monkeypatch.setattr(rag.service, "build_retriever", _spy_build_retriever)
     fake_llm = FakeListChatModel(responses=["Inferno is a CS2 map."])
     app.dependency_overrides[get_qdrant_client] = lambda: qdrant_client
     app.dependency_overrides[get_embeddings] = lambda: ConstantFakeEmbeddings()
@@ -316,7 +316,7 @@ def test_ask_passes_use_compression_and_llm_to_build_retriever(monkeypatch):
         captured_kwargs.update(kwargs)
         return build_retriever(*args, **kwargs)
 
-    monkeypatch.setattr(api.routes, "build_retriever", _spy_build_retriever)
+    monkeypatch.setattr(rag.service, "build_retriever", _spy_build_retriever)
     # "YES" is required, not an arbitrary sentence: the spy delegates to the
     # real build_retriever, so a real ContextualCompressionRetriever runs for
     # real here, and LLMChainFilter's BooleanOutputParser raises ValueError

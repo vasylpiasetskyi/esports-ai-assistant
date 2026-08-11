@@ -1,6 +1,8 @@
 # Project Status
 
-Last updated: 2026-08-09 — **project wrapped up here, deliberately.** All 12 feature branches merged to `master`, pushed to `github.com:vasylpiasetskyi/esports-wiki-ai`, working tree clean and in sync. The user chose to stop active development at this point rather than continue through the remaining "Future Improvements" list.
+Last updated: 2026-08-11 — **development resumed**, extending the `esports-wiki-ai` RAG baseline into an AI assistant per `docs/roadmap-ai-assistant.md`. The repo now lives at `esports-ai-assistant`. Everything below describes the RAG baseline (frozen, preserved as the foundation — see `claude.md`); the "What's next" section at the bottom is the current active scope.
+
+Previously, as of 2026-08-09: **project wrapped up here, deliberately.** All 12 feature branches merged to `master`, pushed to `github.com:vasylpiasetskyi/esports-wiki-ai`, working tree clean and in sync. The user chose to stop active development at this point rather than continue through the remaining "Future Improvements" list.
 
 **Conversation Memory was brainstormed and explicitly not pursued**: the user has already implemented conversation memory (with Postgres/Redis) in another project and didn't need to repeat it here. If resumed later, see the "What's left" section below for where that discussion stopped (client-side history was the agreed direction; Postgres/server-side persistence was explicitly rejected as conflicting with `docs/TDD.md`'s "No SQL" non-goal).
 
@@ -35,7 +37,7 @@ master (crawler → ingestion → chunking → embeddings → indexer → retrie
 
 `/ask` currently accepts three independent, freely-combinable opt-in flags: `use_hybrid`, `use_multi_query`, `use_compression` (all default `False`, preserving original dense-only behavior).
 
-## What's left (per `docs/TDD.md` and `docs/roadmap.md`)
+## What's left (per `docs/TDD.md` and `roadmap-esports-wiki-ai.md`)
 
 - **Manual `POST /crawl` smoke test** against the live server — still only covered by the mocked-transport test suite, never curl'd for real.
 - **Manual smoke test of `use_hybrid`/`use_multi_query`/`use_compression`** against a live server + real OpenAI — implemented and unit-tested, but never exercised for real end-to-end (see "How to resume" below for the curl commands to try).
@@ -44,7 +46,7 @@ master (crawler → ingestion → chunking → embeddings → indexer → retrie
   - **Conversation Memory** — brainstormed 2026-08-09, then explicitly stopped by the user (already implemented elsewhere, with Postgres/Redis, no need to repeat it here). Agreed direction if resumed: client-side history only (`AskRequest` gains a `history: list[{role, content}]` field; no server-side persistence, no SQL) — the question of whether history should also affect retrieval (vs. only the final answer-generation prompt) was raised but never answered before the session ended. **History-aware Retriever** depends on Conversation Memory and was never reached.
   - **Streaming Responses** (API-layer, `/ask` → `StreamingResponse`) — not brainstormed, still open if development resumes.
 - **Automatic game routing** (inferring the `game` metadata filter from the question text) — TDD explicitly defers this to "future versions." Right now callers must build the retriever with an explicit `metadata_filter={"game": ...}` themselves.
-- **Non-goals per TDD** (still true for "the first version"): no auth, no frontend, no agents, no LangGraph, no MCP, no SQL. `docs/roadmap.md`'s Phase 5 (UI), Phase 7 (Agents), Phase 8 (LangGraph) are annotated as explicitly deferred beyond v1, not permanently excluded — same status as before, now written down in the roadmap itself.
+- **Non-goals per TDD** (still true for "the first version"): no auth, no frontend, no agents, no LangGraph, no MCP, no SQL. `roadmap-esports-wiki-ai.md`'s Phase 5 (UI), Phase 7 (Agents), Phase 8 (LangGraph) are annotated as explicitly deferred beyond v1, not permanently excluded — same status as before, now written down in the roadmap itself.
 - **A genuine full end-to-end real run** (crawl → ingest → chunk → embed → index → retrieve → answer, all against live services in one sitting) still hasn't happened in one sitting.
 
 ## How to resume
@@ -74,6 +76,21 @@ master (crawler → ingestion → chunking → embeddings → indexer → retrie
      -d '{"question": "Who is s1mple?", "game": "cs2", "use_hybrid": true, "use_multi_query": true, "use_compression": true}'
    ```
    `use_multi_query` and `use_compression` each add real extra LLM calls (latency/cost) — `use_compression` the most (up to one per retrieved document).
+
+## What's next — AI Assistant roadmap (active scope)
+
+Per `docs/roadmap-ai-assistant.md`, in order:
+
+1. **Milestone 1 — Done (2026-08-11).** `rag/service.py` now has `RAGService.answer(question, game=None, *, use_hybrid=False, use_multi_query=False, use_compression=False)`, hiding Qdrant/retriever/chain construction behind one call. `api/routes.py`'s `/ask` handler only depends on `RAGService` now (no more direct `build_retriever`/`answer_question`/`COLLECTION_NAME` imports). `rag/chains.py` and `rag/retriever.py` are unchanged, just called from inside the service. Sync, not async — the roadmap's illustrative signature was `async def answer(...)`, but the whole codebase (crawler, ingestion, API routes) is sync, and there was nothing actually I/O-bound-and-awaitable to gain from async here; kept consistent with existing conventions instead. Verified: 97/97 tests pass (3 new for `RAGService`), ruff/black clean. Three existing tests that spied on `build_retriever` at the `api.routes` module (`test_ask_passes_use_hybrid/use_multi_query/use_compression_flag_to_build_retriever`) were updated to spy on `rag.service` instead, since that's where the call moved to — expected fallout from moving the construction into the service layer, not a behavior change.
+2. **Milestone 2** — `get_player`, `get_team`, `get_match` LangChain tools, each backed by its own `services/*_service.py`, backed initially by a mock API or static JSON fixtures (no real company data).
+3. **Milestone 3** — Expose the RAG pipeline itself as a `search_knowledge_base` tool, calling `RAGService` (no duplicated RAG logic).
+4. **Milestone 4** — Manual tool-calling loop (LLM → tool call → Python function → `ToolMessage` → LLM), understood before any agent abstraction is introduced.
+5. **Milestone 5** — Agent with access to all four tools, exposed via a new `POST /assistant` endpoint (kept alongside `POST /ask`).
+6. **Milestone 6** — LangGraph "match investigation" workflow (typed state, conditional routing, retry path), exposed via `POST /investigate`.
+7. **Milestone 7** — MCP server (`mcp/server.py` + `mcp/tools/`) reusing the same service layer as the LangChain tools; verified against Claude Code as an MCP client.
+8. **Milestone 8** — Evaluation dataset (`tests/evals/questions.json`) and basic observability (request id, latency, tool-call tracing, token usage).
+
+**Correction to a note below**: the "`langgraph`, a non-goal" aside under "Verify LangChain import paths" was true for the RAG-only v1 scope (`docs/TDD.md`'s non-goals). LangGraph is now an explicit goal (Milestone 6) — that note is historical context for *why* `langchain_classic` was chosen over the full `langchain` meta-package at the time, not a still-standing constraint.
 
 ## Established conventions for continuing this work
 

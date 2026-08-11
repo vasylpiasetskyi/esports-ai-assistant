@@ -21,6 +21,9 @@ description: Best practices for building LangChain applications
 - Qdrant
 - Retriever
 - PromptTemplate
+- Tool / @tool (structured input/output via Pydantic)
+- AgentExecutor / equivalent tool-calling agent
+- LangGraph `StateGraph` (only once a workflow needs it — see `docs/roadmap-ai-assistant.md`)
 
 ## Avoid
 

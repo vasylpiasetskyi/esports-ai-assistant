@@ -442,6 +442,14 @@ No SQL.
 
 The first version should focus exclusively on RAG.
 
+**Scope note (2026-08-11):** these non-goals were scoped to "the first version"
+only, and the first version is done. Agents, LangGraph and MCP are now the
+active scope of `docs/roadmap-ai-assistant.md` — they are deferred here, not
+permanently excluded. This document (`docs/TDD.md`) still governs the RAG
+pipeline itself, which is preserved as-is and wrapped (not rewritten) by the new
+work. No authentication, no frontend and no SQL remain non-goals for the
+assistant too.
+
 ---
 
 # Definition of Done

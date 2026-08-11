@@ -270,6 +270,59 @@ Rejected to keep a clear boundary between code (`crawler/`) and configuration (`
 
 ---
 
+# ADR-010 — Evolve RAG into an Agent-Based AI Assistant
+
+## Status
+
+Accepted
+
+## Decision
+
+Extend the existing RAG application (`esports-wiki-ai`) into an AI assistant
+(`esports-ai-assistant`) by adding, in order: a `RAGService` boundary, LangChain
+tools (`get_player`, `get_team`, `get_match`, `search_knowledge_base`), a manual
+tool-calling loop, an Agent, a LangGraph investigation workflow, and an MCP
+server. Full scope and milestone order live in `docs/roadmap-ai-assistant.md`.
+
+The existing RAG pipeline is preserved as-is and wrapped, not rewritten. `/ask`
+remains available as a direct RAG endpoint alongside the new `/assistant` and
+`/investigate` endpoints.
+
+## Rationale
+
+The RAG-only v1 (`docs/TDD.md`) deliberately scoped out Agents, LangGraph and MCP
+("the first version should focus exclusively on RAG"). That scope is now
+complete. The natural next step for the learning goals of this project is to
+build the surrounding agent architecture on top of a stable RAG foundation,
+rather than starting a new project from scratch.
+
+## Alternatives Considered
+
+### Starting a new project
+
+Rejected — the RAG pipeline (crawler → ingestion → embeddings → Qdrant →
+retriever → chain → API) is exactly the kind of "knowledge" capability an agent
+needs, and rebuilding it would not teach anything new.
+
+### Rewriting the RAG pipeline to fit the new architecture upfront
+
+Rejected — `docs/roadmap-ai-assistant.md` explicitly calls for wrapping the
+existing implementation behind a `RAGService`, not rewriting it. Do not
+over-engineer this boundary.
+
+## Consequences
+
+* `docs/TDD.md`'s non-goals for Agents/LangGraph/MCP are superseded for "the
+  next version" — they were scoped to v1 only, not permanently excluded.
+* Two roadmap documents now coexist: `docs/roadmap-esports-wiki-ai.md` (RAG-only
+  future improvements, e.g. Reranker, Parent Document Retriever, Conversation
+  Memory — independent of the agent work) and `docs/roadmap-ai-assistant.md`
+  (the active scope: Tools, Agent, LangGraph, MCP, Evaluation, Observability).
+* New dependencies will be needed later (LangGraph, an MCP SDK) — add them only
+  when the corresponding milestone is reached, per `.claude/rules/dependencies.md`.
+
+---
+
 # Future ADRs
 
 New architectural decisions should be added using the same structure:
@@ -288,6 +341,11 @@ Examples of future decisions:
 * Multi Query Retriever
 * Contextual Compression Retriever
 * Reranking
+* RAGService Boundary Design
+* Tool Layer Architecture (tools/ vs services/)
+* Mock Data Source for Player/Team/Match Tools
+* Agent Framework Choice (LangChain AgentExecutor vs. manual loop vs. LangGraph)
 * LangGraph Migration
+* MCP Server Design
 * Local Embedding Models
 * Support for Additional Knowledge Sources
