@@ -1,0 +1,14 @@
+[
+  {"game": "cs2", "category": "terms", "title": "Economy Round", "slug": "economy_round", "tags": ["economy", "terms"]},
+  {"game": "cs2", "category": "maps", "title": "Inferno", "slug": "inferno", "tags": ["map"]},
+  {"game": "cs2", "category": "teams", "title": "Natus Vincere", "slug": "navi", "tags": ["team", "ukraine"]},
+  {"game": "dota2", "category": "terms", "title": "Denying", "slug": "denying", "tags": ["mechanic", "terms"]},
+  {"game": "dota2", "category": "mechanics", "title": "Roshan", "slug": "roshan", "tags": ["mechanic", "boss"]},
+  {"game": "dota2", "category": "teams", "title": "Natus Vincere", "slug": "navi", "tags": ["team", "ukraine"]},
+  {"game": "lol", "category": "terms", "title": "Glossary", "slug": "glossary", "tags": ["terms"]},
+  {"game": "lol", "category": "champions", "title": "Ahri", "slug": "ahri", "tags": ["champion"]},
+  {"game": "lol", "category": "teams", "title": "T1", "slug": "t1", "tags": ["team", "south-korea"]},
+  {"game": "valorant", "category": "agents", "title": "Jett", "slug": "jett", "tags": ["agent"]},
+  {"game": "valorant", "category": "weapons", "title": "Operator", "slug": "operator", "tags": ["weapon"]},
+  {"game": "valorant", "category": "teams", "title": "Sentinels", "slug": "sentinels", "tags": ["team", "north-america"]}
+]
